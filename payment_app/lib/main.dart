@@ -59,13 +59,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> makePayment() async {
     try {
-      paymentIntentData = await createPaymementIntent('5', 'USD');
+      paymentIntentData = await createPaymementIntent('0.50', 'USD');
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
         paymentIntentClientSecret: paymentIntentData!['client_secret'],
-        applePay: const PaymentSheetApplePay(
-          merchantCountryCode: 'US',
-        ),
+        // applePay: const PaymentSheetApplePay(
+        //   merchantCountryCode: 'US',
+        // ),
         googlePay: const PaymentSheetGooglePay(
           merchantCountryCode: 'DE',
           testEnv: true,
@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       displyPaymentSheet();
     } catch (e) {
-      debugPrint(e as String?);
+      debugPrint(e.toString());
     }
   }
 
@@ -110,8 +110,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   createPaymementIntent(String amount, String currency) async {
     try {
+      // Convert amount to cents as an integer
+      int amountInCents = (double.parse(amount) * 100).toInt();
+
       Map<String, dynamic> body = {
-        'amount': int.parse(amount),
+        'amount': amountInCents.toString(),
         'currency': currency,
         'payment_method_types[]': 'card'
       };
@@ -122,9 +125,10 @@ class _MyHomePageState extends State<MyHomePage> {
             'Authorization': 'Bearer sk_test_4eC39HqLyjWDarjtT1zdp7dc',
             'Content-Type': 'application/x-www-form-urlencoded'
           });
+      debugPrint(response.body.toString());
       return jsonDecode(response.body.toString());
     } catch (e) {
-      debugPrint(e as String?);
+      debugPrint(e.toString());
     }
   }
 }
